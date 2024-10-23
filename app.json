@@ -2,10 +2,10 @@
   "expo": {
     "name": "ReadMind",
     "slug": "ReadMind",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "readmind",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -38,6 +38,12 @@
       "eas": {
         "projectId": "3298c77f-d1d3-4457-af0a-1882590d68bf"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3298c77f-d1d3-4457-af0a-1882590d68bf"
     }
   }
 }

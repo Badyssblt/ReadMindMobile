@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView, TouchableOpacity, Text, TextInput, Alert } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, TextInput, Alert } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function TokenForm() {
     const [token, setToken] = useState('');
+    const [success, setSuccess] = useState(false);
 
     const handleSubmit = async () => {
         if (token) {
             try {
                 await AsyncStorage.setItem('token', token);
                 setToken('');
+                setSuccess(true)
             } catch (error) {
                 Alert.alert("Erreur", "Échec de la sauvegarde du token");
             }
@@ -33,6 +36,10 @@ export default function TokenForm() {
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Envoyer</Text>
                 </TouchableOpacity>
+                    {
+                    success &&
+                    <Text>Votre token a été enregistré !</Text>
+                    }
             </View>
         </SafeAreaView>
     );

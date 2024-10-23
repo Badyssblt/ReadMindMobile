@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, SafeAreaView, Animated } from 'react-native';
+import { StyleSheet, View, Animated } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context"
 import { WebView } from 'react-native-webview';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useRoute} from "@react-navigation/native";
 
 export default function HomeScreen() {
     const [loading, setLoading] = useState(false);
@@ -9,6 +11,9 @@ export default function HomeScreen() {
     const progress = useRef(new Animated.Value(0)).current;
     const [slug, setSlug] = useState('');
     const [token, setToken] = useState('');
+    const [url, setUrl] = useState('https://phenixscans.fr');
+    const route = useRoute();
+    const { extractedURL } = route.params || {};
 
 
     const handleNavigation = (event) => {
@@ -26,10 +31,10 @@ export default function HomeScreen() {
     }
 
     const handleLoadStart = () => {
-        setLoading(true);  // Commence le chargement
+        setLoading(true);
         Animated.timing(progress, {
-            toValue: 1,  // Fait évoluer la barre jusqu'à 100%
-            duration: 5000,  // Durée arbitraire (5 secondes)
+            toValue: 1,
+            duration: 5000,
             useNativeDriver: false,
         }).start();
     };
@@ -44,11 +49,14 @@ export default function HomeScreen() {
     };
 
     useEffect(() => {
+        if (extractedURL) {
+            setUrl(extractedURL);
+        }
         if (!loading) {
             progress.setValue(0);
         }
         getToken()
-    }, [loading]);
+    }, [loading, extractedURL]);
 
     const extractChapterInfo = (url) => {
         const urlPattern = /^(https?:\/\/[^\/]+)\/(?:v\d{6}-(.+?)-chapitre-(\d+)(?:-v\d+)?\/|(.+?)-chapitre-(\d+)(?:-v\d+)?\/)/;
@@ -64,7 +72,6 @@ export default function HomeScreen() {
             console.log("L'URL ne correspond pas au pattern attendu");
         }
 
-        console.log(match)
     };
 
     const setChapter = async () => {
@@ -75,7 +82,8 @@ export default function HomeScreen() {
                     'Content-Type': 'application/merge-patch+json',
                 },
                 body: JSON.stringify({
-                    chapter: currentChapter
+                    chapter: currentChapter,
+                    currentURL: url
                 })
             });
 
@@ -90,6 +98,7 @@ s        }
 
     const handleNavigationStateChange = (navState) => {
         const { url } = navState;
+        setUrl(url);
         if (url) {
             extractChapterInfo(url);
             setChapter();
@@ -102,18 +111,20 @@ s        }
     });
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView  style={styles.safeArea}>
             <View style={styles.container}>
                 {loading && (
                     <Animated.View style={[styles.progressBar, { width: progressWidth }]} />
                 )}
                 <WebView
-                    source={{ uri: 'https://phenixscans.fr' }}
+                    source={{ uri: url }}
                     style={styles.webview}
                     onShouldStartLoadWithRequest={handleNavigation}
                     onLoadStart={handleLoadStart}
                     onLoadEnd={handleLoadEnd}
-                    onNavigationStateChange={handleNavigationStateChange}  // Ajout de la fonction pour capturer l'URL
+                    cacheEnabled={true}
+                    onNavigationStateChange={handleNavigationStateChange}
+
                 />
             </View>
         </SafeAreaView>
